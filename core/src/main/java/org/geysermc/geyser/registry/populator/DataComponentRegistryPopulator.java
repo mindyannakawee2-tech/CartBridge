@@ -83,7 +83,20 @@ public final class DataComponentRegistryPopulator {
                     ByteBuf buf = Unpooled.wrappedBuffer(bytes);
                     int varInt = MinecraftTypes.readVarInt(buf);
                     DataComponentType<?> dataComponentType = DataComponentTypes.from(varInt);
-                    DataComponent<?, ?> dataComponent = dataComponentType.readDataComponent(buf);
+                    DataComponent<?, ?> dataComponent;
+                    try {
+                        dataComponent = dataComponentType.readDataComponent(buf);
+                    } catch (Exception ex) {
+                        throw new IllegalStateException(
+                                "CartBridge component failure:"
+                                + " itemIndex=" + defaultComponents.size()
+                                + ", component=" + componentEntry.getKey()
+                                + ", typeId=" + varInt
+                                + ", resolvedType=" + dataComponentType
+                                + ", bytes=" + bytes.length
+                                + ", offset=" + buf.readerIndex(),
+                                ex);
+                    }
 
                     map.put(dataComponentType, dataComponent);
                 }
